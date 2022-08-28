@@ -1,0 +1,22 @@
+[About]
+Type=label
+Label=About
+Category=About Plugin
+CategoryOrder=-1
+Default=Husk USD Standalone renderer v0.1b
+Description=Not configurable
+
+[Author]
+Type=label
+Label=Author
+Category=About Plugin
+CategoryOrder=-1
+Default=Tronotools - Trond Hille 2022
+Description=Not configurable
+
+[HuskRenderExecutable]
+Type=filename
+Label=Houdini Husk Executable
+Default=C:\Program Files\Side Effects Software\Houdini 19.5.303\bin\husk.exe;/opt/hfs19.5/bin/husk
+Description=The path to the husk executable within your Houdini installation directory.
+
