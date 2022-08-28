@@ -329,7 +329,7 @@ def SubmitButtonPressed(*args):
     writer.WriteLine('SecondaryPool=%s' % scriptDialog.GetValue('SecondaryPoolBox'))
     writer.WriteLine('Group=%s' % scriptDialog.GetValue('GroupBox'))
     writer.WriteLine('Priority=%s' % scriptDialog.GetValue('PriorityBox'))
-    writer.WriteLine('TaskTimeoutMinutes=%s' % scriptDialog.GetValue('TaskTimeoutBox' )
+    writer.WriteLine('TaskTimeoutMinutes=%s' % scriptDialog.GetValue('TaskTimeoutBox'))
     writer.WriteLine('EnableAutoTimeout=%s' % scriptDialog.GetValue('AutoTimeoutBox'))
     writer.WriteLine('ConcurrentTasks=%s' % concurrentTasks )
     writer.WriteLine('LimitConcurrentTasksToNumberOfCpus=%s' % scriptDialog.GetValue('LimitConcurrentTasksBox'))
