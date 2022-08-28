@@ -44,14 +44,14 @@ def __main__(*args):
     global settings
     
     scriptDialog = DeadlineScriptDialog()
-    scriptDialog.SetTitle( "Submit Husk USD Job To Deadline" )
-    scriptDialog.SetIcon( scriptDialog.GetIcon( 'Husk' ) )
+    scriptDialog.SetTitle('Submit Husk USD Job To Deadline')
+    scriptDialog.SetIcon(scriptDialog.GetIcon('Husk'))
     
-    scriptDialog.AddTabControl( "Tabs", 0, 0 )
+    scriptDialog.AddTabControl('Tabs', 0, 0)
     
-    scriptDialog.AddTabPage( "Job Options" )
+    scriptDialog.AddTabPage('Job Options')
     scriptDialog.AddGrid()
-    scriptDialog.AddControlToGrid( "Separator1", "SeparatorControl", "Job Description", 0, 0, colSpan=2 )
+    scriptDialog.AddControlToGrid('Separator1', 'SeparatorControl', 'Job Description', 0, 0, colSpan=2)
 
     scriptDialog.AddControlToGrid( "NameLabel", "LabelControl", "Job Name", 1, 0, "The name of your job. This is optional, and if left blank, it will default to 'Untitled'.", False )
     scriptDialog.AddControlToGrid( "NameBox", "TextControl", "Untitled", 1, 1 )
@@ -105,7 +105,7 @@ def __main__(*args):
     scriptDialog.EndGrid()
     scriptDialog.EndTabPage()
     
-    scriptDialog.AddTabPage( "Husk Options" )
+    scriptDialog.AddTabPage('Husk Options')
     scriptDialog.AddGrid()
 
     scriptDialog.AddControlToGrid( "Separator3", "SeparatorControl", "Husk Options", 0, 0, colSpan=4 )
@@ -195,7 +195,7 @@ def ProcessOuputPath(path, frameToCompare='00', new_frame_expression='$F'):
 
 def GetSettingsFilename():
     # type: () -> str
-    return os.path.join( ClientUtils.GetUsersSettingsDirectory(), "HuskSettings.ini" )
+    return os.path.join(ClientUtils.GetUsersSettingsDirectory(), 'HuskSettings.ini')
 
 def FixPath(old_path, new_sep='/', rem_spaces=1):
     _path = old_path.replace('\\', '/')
@@ -217,7 +217,7 @@ def FileLoaded( *args ):
     # type: (*Any) -> None
     global scriptDialog
     
-    filename = scriptDialog.GetValue( "SceneBox" ).strip()
+    filename = scriptDialog.GetValue('SceneBox').strip()
     filename = FixPath(filename, rem_spaces=0)
     stage = None
     if File.Exists(filename):
@@ -284,70 +284,70 @@ def SubmitButtonPressed(*args):
     warnings = ""
 
     # Check if USD files exist.
-    sceneFile = scriptDialog.GetValue( "SceneBox" ).strip()
+    sceneFile = scriptDialog.GetValue('SceneBox').strip()
     #if not exists(sceneFile):
     #    errors += 'USD file does not exist!\n'
-    tempErrors, tempWarnings = CheckFile( sceneFile, "USD", False )
+    tempErrors, tempWarnings = CheckFile(sceneFile, 'USD', False)
     errors += tempErrors
     warnings += tempWarnings
 
 
     # Check if a valid frame range has been specified.
-    frames = scriptDialog.GetValue( "FramesBox" ).strip()
+    frames = scriptDialog.GetValue('FramesBox').strip()
     if not FrameUtils.FrameRangeValid( frames ):
         errors += 'The Frame Range "%s" is not valid.\n' % frames
 
     # Check the image output folder
-    imageOutputDirectory = scriptDialog.GetValue( "ImageOutputBox" ).strip()
+    imageOutputDirectory = scriptDialog.GetValue('ImageOutputBox').strip()
     tempErrors, tempWarnings = CheckDirectory( imageOutputDirectory, "Image Output Directory", True )
     errors += tempErrors
     warnings += tempWarnings
 
-    concurrentTasks = scriptDialog.GetValue( "ConcurrentTasksBox" )
+    concurrentTasks = scriptDialog.GetValue('ConcurrentTasksBox')
 
     # output errors , warnings
     if errors:
-        scriptDialog.ShowMessageBox( "The following errors must be fixed before submitting the Husk job:\n\n%s" % errors, "Errors" )
+        scriptDialog.ShowMessageBox('The following errors must be fixed before submitting the Husk job:\n\n%s' % errors, 'Errors')
         return
     elif warnings:
-        result = scriptDialog.ShowMessageBox( "%sAre you sure you want to submit this job?" % warnings, "Warnings", ( "Yes", "No" ) )
-        if result == "No":
+        result = scriptDialog.ShowMessageBox('%sAre you sure you want to submit this job?' % warnings, 'Warnings', ('Yes', 'No'))
+        if result == 'No':
             return
 
-    jobName = scriptDialog.GetValue( "NameBox" )
+    jobName = scriptDialog.GetValue('NameBox')
 
 
 
      # Create job info file.
-    jobInfoFilename = os.path.join( ClientUtils.GetDeadlineTempPath(), "husk_job_info.job" )
+    jobInfoFilename = os.path.join(ClientUtils.GetDeadlineTempPath(), 'husk_job_info.job')
     writer = StreamWriter( jobInfoFilename, False, Encoding.Unicode )
-    writer.WriteLine( "Plugin=Husk" )
-    writer.WriteLine( "Name=%s" % jobName )
-    writer.WriteLine( "Comment=%s" % scriptDialog.GetValue( "CommentBox" ) )
-    writer.WriteLine( "Department=%s" % scriptDialog.GetValue( "DepartmentBox" ) )
-    writer.WriteLine( "Pool=%s" % scriptDialog.GetValue( "PoolBox" ) )
-    writer.WriteLine( "SecondaryPool=%s" % scriptDialog.GetValue( "SecondaryPoolBox" ) )
-    writer.WriteLine( "Group=%s" % scriptDialog.GetValue( "GroupBox" ) )
-    writer.WriteLine( "Priority=%s" % scriptDialog.GetValue( "PriorityBox" ) )
-    writer.WriteLine( "TaskTimeoutMinutes=%s" % scriptDialog.GetValue( "TaskTimeoutBox" ) )
-    writer.WriteLine( "EnableAutoTimeout=%s" % scriptDialog.GetValue( "AutoTimeoutBox" ) )
-    writer.WriteLine( "ConcurrentTasks=%s" % concurrentTasks )
-    writer.WriteLine( "LimitConcurrentTasksToNumberOfCpus=%s" % scriptDialog.GetValue( "LimitConcurrentTasksBox" ) )
+    writer.WriteLine('Plugin=Husk')
+    writer.WriteLine('Name=%s' % jobName )
+    writer.WriteLine('Comment=%s' % scriptDialog.GetValue('CommentBox'))
+    writer.WriteLine('Department=%s' % scriptDialog.GetValue('DepartmentBox'))
+    writer.WriteLine('Pool=%s' % scriptDialog.GetValue('PoolBox'))
+    writer.WriteLine('SecondaryPool=%s' % scriptDialog.GetValue('SecondaryPoolBox'))
+    writer.WriteLine('Group=%s' % scriptDialog.GetValue('GroupBox'))
+    writer.WriteLine('Priority=%s' % scriptDialog.GetValue('PriorityBox'))
+    writer.WriteLine('TaskTimeoutMinutes=%s' % scriptDialog.GetValue('TaskTimeoutBox' )
+    writer.WriteLine('EnableAutoTimeout=%s' % scriptDialog.GetValue('AutoTimeoutBox'))
+    writer.WriteLine('ConcurrentTasks=%s' % concurrentTasks )
+    writer.WriteLine('LimitConcurrentTasksToNumberOfCpus=%s' % scriptDialog.GetValue('LimitConcurrentTasksBox'))
     
-    writer.WriteLine( "MachineLimit=%s" % scriptDialog.GetValue( "MachineLimitBox" ) )
-    if bool( scriptDialog.GetValue( "IsBlacklistBox" ) ):
-        writer.WriteLine( "Blacklist=%s" % scriptDialog.GetValue( "MachineListBox" ) )
+    writer.WriteLine('MachineLimit=%s' % scriptDialog.GetValue('MachineLimitBox'))
+    if bool(scriptDialog.GetValue('IsBlacklistBox')):
+        writer.WriteLine('Blacklist=%s' % scriptDialog.GetValue('MachineListBox'))
     else:
-        writer.WriteLine( "Whitelist=%s" % scriptDialog.GetValue( "MachineListBox" ) )
+        writer.WriteLine('Whitelist=%s' % scriptDialog.GetValue('MachineListBox'))
     
-    writer.WriteLine( "LimitGroups=%s" % scriptDialog.GetValue( "LimitGroupBox" ) )
-    writer.WriteLine( "JobDependencies=%s" % scriptDialog.GetValue( "DependencyBox" ) )
-    writer.WriteLine( "OnJobComplete=%s" % scriptDialog.GetValue( "OnJobCompleteBox" ) )
+    writer.WriteLine('LimitGroups=%s' % scriptDialog.GetValue('LimitGroupBox'))
+    writer.WriteLine('JobDependencies=%s' % scriptDialog.GetValue('DependencyBox'))
+    writer.WriteLine('OnJobComplete=%s' % scriptDialog.GetValue('OnJobCompleteBox'))
     
-    if bool( scriptDialog.GetValue( "SubmitSuspendedBox" ) ):
-        writer.WriteLine( "InitialStatus=Suspended" )
+    if bool( scriptDialog.GetValue('SubmitSuspendedBox')):
+        writer.WriteLine('InitialStatus=Suspended')
     
-    writer.WriteLine( "Frames=%s" % frames )
+    writer.WriteLine('Frames=%s' % frames)
     writer.WriteLine('ChunkSize=1')
 
     outputDirectoryCount = 0
@@ -370,8 +370,8 @@ def SubmitButtonPressed(*args):
         writer.WriteLine( "ImageOutputDirectory=%s" % imageOutputDirectory )
 
     writer.WriteLine('OverrideResolution=1')
-    writer.WriteLine('Width=%d' % scriptDialog.GetValue('WidthBox') )
-    writer.WriteLine('Height=%d' % scriptDialog.GetValue('HeightBox') )
+    writer.WriteLine('Width=%d' % scriptDialog.GetValue('WidthBox'))
+    writer.WriteLine('Height=%d' % scriptDialog.GetValue('HeightBox'))
     #Implement this in submitter later - can be changed in job properties for now
     writer.WriteLine('LogLevel=2')
 
@@ -383,13 +383,13 @@ def SubmitButtonPressed(*args):
     arguments.Add( pluginInfoFilename )
     
     # Now submit the job.
-    results = ClientUtils.ExecuteCommandAndGetOutput( arguments )
-    scriptDialog.ShowMessageBox( results, "Submission Results" )
+    results = ClientUtils.ExecuteCommandAndGetOutput(arguments)
+    scriptDialog.ShowMessageBox( results, 'Submission Results')
 
 def CheckFile( file, name, isOptional ):
     # type: (str, str, bool) -> Tuple[str, str]
-    errors = ""
-    warnings = ""
+    errors = ''
+    warnings = ''
 
     if file:
         if not os.path.isfile( file ):
