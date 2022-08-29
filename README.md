@@ -20,11 +20,16 @@ Redshift Standalone submitter shipped with Deadline.
 - Python, developed and tested with Python 3.7.
 	- Currently doesn't seem to work with Python greater than Python 3.8
 - usd-core Python API: https://pypi.org/project/usd-core/
-- Thinkbox Deadline: https://www.awsthinkbox.com/
+- Thinkbox Deadline, PY3 version: https://www.awsthinkbox.com/
+- Python and libraries needs to be installed on any computer you submit from.
 
 # Installation
 - Add usd-core library path to Python Search Path in Deadline resposity options 
 - Copy folders with files into <Deadline Repository>/custom directory
+
+# FAQ
+- Deadline Shows a PXR related module error:
+	- I've seen errors happening on version 10.1.19.x. Upgrading to Deadline 10.1.20 or never with Python3 seems to work. Also make sure Python Sandbox version is set to 3 in the repository options
 
 # To-do:
 - Implement saving and exposing as many render settings as possible to Deadline.
