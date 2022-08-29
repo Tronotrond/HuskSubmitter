@@ -17,6 +17,8 @@ To keep everything close to Deadline Standards, the submitter GUI and settings a
 Redshift Standalone submitter shipped with Deadline. 
 
 # Requirements:
+- Python, developed and tested with Python 3.7.
+	- Currently doesn't seem to work with Python greater than Python 3.8
 - usd-core Python API: https://pypi.org/project/usd-core/
 - Thinkbox Deadline: https://www.awsthinkbox.com/
 

@@ -73,3 +73,14 @@ Description=Override Rendering Pixel Samples
 Required=false
 DisableIfBlank=true
 Default=256
+
+[DisableMotionBlur]
+Type=boolean
+Label=Disable Motion Blur
+Category=Render Options
+CategoryOrder=1
+Index=6
+Description=If enabled, motion blur will be disabled.
+Required=true
+DisableIfBlank=false
+Default=false

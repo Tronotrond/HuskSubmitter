@@ -5,6 +5,7 @@
 # Submit and render .USD scenes with the standalone Husk renderer
 #
 # Requirements:
+#   - Python 3.7    
 #   - usd-core installed on repository
 #
 ########################################################################
@@ -117,15 +118,24 @@ def __main__(*args):
     scriptDialog.AddControlToGrid( "FramesLabel", "LabelControl", "Frame List", 2, 0, "The frame range to render.", False )
     scriptDialog.AddControlToGrid( "FramesBox", "TextControl", "", 2, 1 )
 
+    resOverrideBox = scriptDialog.AddSelectionControlToGrid( "ResOverrideBox", "CheckBoxControl", False, "Override Resolution", 11, 0, "If enabled, resolution will be overwritten with the values specified." )
+    resOverrideBox.ValueModified.connect( enableResOverride )
+
     scriptDialog.AddControlToGrid( "WidthLabel", "LabelControl", "Width", 12, 0, "Width of the image." )
-    scriptDialog.AddRangeControlToGrid( "WidthBox", "RangeControl", 800, 1, 50000, 0, 1, 12, 1, "Width" )
-
+    scriptDialog.AddRangeControlToGrid( "WidthBox", "RangeControl", 1280, 1, 50000, 0, 1, 12, 1, "Width" )
+    scriptDialog.SetEnabled( "WidthLabel", False )
+    scriptDialog.SetEnabled( "WidthBox", False )
+    
     scriptDialog.AddControlToGrid( "HeightLabel", "LabelControl", "Height", 12, 2, "Height of the image." )
-    scriptDialog.AddRangeControlToGrid( "HeightBox", "RangeControl", 600, 1, 50000, 0, 1, 12, 3, "Height" )
-
+    scriptDialog.AddRangeControlToGrid( "HeightBox", "RangeControl", 720, 1, 50000, 0, 1, 12, 3, "Height" )
+    scriptDialog.SetEnabled( "HeightLabel", False )
+    scriptDialog.SetEnabled( "HeightBox", False )
 
     scriptDialog.AddControlToGrid( "ImageOutputLabel", "LabelControl", "Image Output Directory", 4, 0, "Custom rendering output path.", False )
     scriptDialog.AddSelectionControlToGrid( "ImageOutputBox", "FolderBrowserControl", "", "", 4, 1, colSpan=3 )
+
+    scriptDialog.AddSelectionControlToGrid( "DisableMoBlur", "CheckBoxControl", False, "Disable Motion Blur", 13, 0, "If enabled, motion blur will be disabled in renderer." )
+
 
     scriptDialog.EndGrid()
     scriptDialog.EndTabPage()
@@ -148,6 +158,15 @@ def __main__(*args):
     FileLoaded()
     scriptDialog.ShowDialog( False )
     
+def enableResOverride( *args ):
+    # type: (*CheckBoxControl) -> None
+    global scriptDialog
+    resOverride = scriptDialog.GetValue( "ResOverrideBox" )
+    scriptDialog.SetEnabled( "WidthLabel", resOverride )
+    scriptDialog.SetEnabled( "WidthBox", resOverride )
+    scriptDialog.SetEnabled( "HeightLabel", resOverride )
+    scriptDialog.SetEnabled( "HeightBox", resOverride )
+
 
 def ProcessOuputPath(path, frameToCompare='00', new_frame_expression='$F'):
     # Builds a dictionary from path and detects where the frame number is located
@@ -263,6 +282,8 @@ def FileLoaded( *args ):
         
         # Get image output path
         if product != None:
+            disablemb = product.GetAttribute('disableMotionBlur')
+            scriptDialog.SetValue('DisableMoBlur', disablemb)
             # Output image path is evaluated at given frame. ProcessOuputPath detects where the frame is in the path            
             # Will then process, detect and replace the frame number with expression
             productName = product.GetAttribute('productName').Get(int(endfr))
@@ -294,12 +315,12 @@ def SubmitButtonPressed(*args):
 
     # Check if a valid frame range has been specified.
     frames = scriptDialog.GetValue('FramesBox').strip()
-    if not FrameUtils.FrameRangeValid( frames ):
+    if not FrameUtils.FrameRangeValid(frames):
         errors += 'The Frame Range "%s" is not valid.\n' % frames
 
     # Check the image output folder
     imageOutputDirectory = scriptDialog.GetValue('ImageOutputBox').strip()
-    tempErrors, tempWarnings = CheckDirectory( imageOutputDirectory, "Image Output Directory", True )
+    tempErrors, tempWarnings = CheckDirectory(imageOutputDirectory, 'Image Output Directory', True )
     errors += tempErrors
     warnings += tempWarnings
 
@@ -369,11 +390,13 @@ def SubmitButtonPressed(*args):
     if len( imageOutputDirectory ) > 0:
         writer.WriteLine( "ImageOutputDirectory=%s" % imageOutputDirectory )
 
-    writer.WriteLine('OverrideResolution=1')
+    writer.WriteLine('OverrideResolution=%d' % scriptDialog.GetValue('ResOverrideBox'))
     writer.WriteLine('Width=%d' % scriptDialog.GetValue('WidthBox'))
     writer.WriteLine('Height=%d' % scriptDialog.GetValue('HeightBox'))
     #Implement this in submitter later - can be changed in job properties for now
     writer.WriteLine('LogLevel=2')
+    writer.WriteLine('DisableMotionBlur=%d' % scriptDialog.GetValue('DisableMoBlur'))
+    
 
     writer.Close()
     
