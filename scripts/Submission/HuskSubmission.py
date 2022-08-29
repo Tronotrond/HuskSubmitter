@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ########################################################################
 # HUSK USD Scene submission script
 # Tronotools - Trond Hille 2022
@@ -9,6 +11,7 @@
 #   - usd-core installed on repository
 #
 ########################################################################
+
 from __future__ import absolute_import
 import os
 from typing import Any, Tuple
