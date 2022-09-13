@@ -115,7 +115,7 @@ def __main__(*args):
     scriptDialog.AddControlToGrid( "Separator3", "SeparatorControl", "Husk Options", 0, 0, colSpan=4 )
 
     scriptDialog.AddControlToGrid( "SceneLabel", "LabelControl", "USD File", 1, 0, "The USD file(s) to be rendered.", False )
-    sceneBox = scriptDialog.AddSelectionControlToGrid( "SceneBox", "FileBrowserControl", "", "USD Files (*.usd);;All Files (*)", 1, 1, colSpan=3 )
+    sceneBox = scriptDialog.AddSelectionControlToGrid( "SceneBox", "FileBrowserControl", "", "USD Files (*.usd; *.usda);;All Files (*)", 1, 1, colSpan=3 )
     sceneBox.ValueModified.connect( FileLoaded )
 
     scriptDialog.AddControlToGrid( "FramesLabel", "LabelControl", "Frame List", 2, 0, "The frame range to render.", False )
@@ -170,6 +170,13 @@ def enableResOverride( *args ):
     scriptDialog.SetEnabled( "HeightLabel", resOverride )
     scriptDialog.SetEnabled( "HeightBox", resOverride )
 
+def PathDict(path):
+    regex = r'(?P<drive>[A-Z]:\/)(?P<path>.*\/)(?P<file>.*)(?P<ext>\..*)$'
+    pat = re.compile(regex)
+    result = pat.match(path)
+    data = result.groupdict() 
+    
+    return data
 
 def ProcessOuputPath(path, frameToCompare='00', new_frame_expression='$F'):
     # Builds a dictionary from path and detects where the frame number is located
@@ -255,13 +262,16 @@ def FileLoaded( *args ):
             return
         print('USD file loaded')
 
+        # Set job name to scene file name
+        filedict = PathDict(filename)
+        scriptDialog.SetValue('NameBox', filedict['file'])
 
         # Get start and end frame
         startfr = stage.GetStartTimeCode()
         endfr = stage.GetEndTimeCode()
 
         frameString = str(int(startfr)) + '-' + str(int(endfr))
-        scriptDialog.SetValue("FramesBox", frameString)
+        scriptDialog.SetValue('FramesBox', frameString)
 
         # Find the Rendersetting and Product primitives in USD scene
         product = None
