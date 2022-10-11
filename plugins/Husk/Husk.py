@@ -83,7 +83,7 @@ class HuskPlugin(DeadlinePlugin):
         if overrideres:
             arguments += '--res {0} {1} '.format(width, height)
         if overriderender:
-            arguments += '-R {0} '.format(overriderender)
+            arguments += '-R {0} '.format(renderdelegate)
         arguments += '-o ' + outFile
         arguments += ' --make-output-path' + ' '
         
