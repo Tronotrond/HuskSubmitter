@@ -73,6 +73,7 @@ class HuskPlugin(DeadlinePlugin):
         overrideres = self.GetPluginInfoEntry('OverrideResolution')
         overriderender = self.GetPluginInfoEntry('OverrideRenderDelegate')
         renderdelegate = self.GetPluginInfoEntry('RenderDelegate')
+        customargs = self.GetPluginInfoEntry('CustomArguments')
         logLevel = self.GetPluginInfoEntry('LogLevel')
         
         frameNumber = self.GetStartFrame()
@@ -84,6 +85,7 @@ class HuskPlugin(DeadlinePlugin):
             arguments += '--res {0} {1} '.format(width, height)
         if overriderender:
             arguments += '-R {0} '.format(renderdelegate)
+        arguments += customargs + ' '
         arguments += '-o ' + outFile
         arguments += ' --make-output-path' + ' '
         
