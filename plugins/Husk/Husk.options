@@ -1,28 +1,19 @@
-[LogLevel]
-Type=Integer
-Label=Verbose Logging Level
-Description=Default Level 2 - 8 and above might negatively affect performance!
-Required=true
-DisableIfBlank=false
-DefaultValue=2
-Validator=\d*
-
-[ImageOutputDirectory]
-Type=folder
-Label=Image Output Directory
-Category=Output
-CategoryOrder=2
+[SceneFile]
+Type=filename
+Label=Scene Filename
+Category=Render Options
+CategoryOrder=1
 Index=0
-Description=Overrides the image output directory. If left blank, Redshift will save the image output to the folder defined in the .rs file.
+Description=The scene filename as it exists on the network.
 Required=false
-DisableIfBlank=false
+DisableIfBlank=true
 
 [OverrideResolution]
 Type=boolean
 Label=Override Resolution
 Category=Render Options
 CategoryOrder=1
-Index=6
+Index=1
 Description=If enabled, override resolution with the specified width and height.
 Required=true
 DisableIfBlank=false
@@ -34,7 +25,7 @@ Minimum=1
 Label=Image Width
 Category=Render Options
 CategoryOrder=1
-Index=7
+Index=2
 Description=The output image width in pixels.
 Required=true
 DisableIfBlank=false
@@ -46,18 +37,27 @@ Minimum=1
 Label=Image Height
 Category=Render Options
 CategoryOrder=1
-Index=8
+Index=3
 Description=The output image height in pixels.
 Required=true
 DisableIfBlank=false
 Default=600
 
-[SceneFile]
-Type=filename
-Label=Scene Filename
+[OverrideRenderDelegate]
+Type=boolean
+Label=Override Render Delegate
 Category=Render Options
 CategoryOrder=1
-Index=0
+Index=4
+Description=The scene filename as it exists on the network.
+Required=false
+
+[RenderDelegate]
+Type=string
+Label=Render Delegate
+Category=Render Options
+CategoryOrder=1
+Index=4
 Description=The scene filename as it exists on the network.
 Required=false
 DisableIfBlank=true
@@ -74,13 +74,33 @@ Required=false
 DisableIfBlank=true
 Default=256
 
+[ImageOutputDirectory]
+Type=folder
+Label=Image Output Directory
+Category=Output
+CategoryOrder=2
+Index=0
+Description=Overrides the image output directory. If left blank, Redshift will save the image output to the folder defined in the .rs file.
+Required=false
+DisableIfBlank=false
+
+
 [DisableMotionBlur]
 Type=boolean
 Label=Disable Motion Blur
 Category=Render Options
 CategoryOrder=1
-Index=6
+Index=
 Description=If enabled, motion blur will be disabled.
 Required=true
 DisableIfBlank=false
 Default=false
+
+[LogLevel]
+Type=Integer
+Label=Verbose Logging Level
+Description=Default Level 2 - 8 and above might negatively affect performance!
+Required=true
+DisableIfBlank=false
+DefaultValue=2
+Validator=\d*
