@@ -147,8 +147,11 @@ def __main__(*args):
     #scriptDialog.AddControlToGrid( "RenderBox", "GroupComboControl", "Karma, Redshift", 14, 1 )
     scriptDialog.SetEnabled( "RenderDelegate", False )
     
-    scriptDialog.AddControlToGrid( "LogLabel", "LabelControl", "Log Level", 7, 0, "Set log level. Default 2, above 8 can impact performance", False )
-    scriptDialog.AddRangeControlToGrid( "LogLevel", "RangeControl", 2, 0, 9, 0, 1, 7, 1 )
+    scriptDialog.AddControlToGrid( "ArgLabel", "LabelControl", "Custom Render Arguments", 7, 0, "Set any additional command line arguments to pass to Husk", False )
+    scriptDialog.AddControlToGrid( "CustomArgs", "TextControl", "", 7, 1 )
+    
+    scriptDialog.AddControlToGrid( "LogLabel", "LabelControl", "Log Level", 8, 0, "Set log level. Default 2, above 8 can impact performance", False )
+    scriptDialog.AddRangeControlToGrid( "LogLevel", "RangeControl", 2, 0, 9, 0, 1, 8, 1 )
     
     scriptDialog.EndGrid()
     scriptDialog.EndTabPage()
@@ -428,6 +431,7 @@ def SubmitButtonPressed(*args):
     writer.WriteLine('LogLevel=%d' % scriptDialog.GetValue('LogLevel'))
     writer.WriteLine('OverrideRenderDelegate=%d' % scriptDialog.GetValue('OverrideRenderDelegate'))
     writer.WriteLine('RenderDelegate=%s' % scriptDialog.GetValue('RenderDelegate'))
+    writer.WriteLine('CustomArguments=%s' % scriptDialog.GetValue('CustomArgs'))
     #writer.WriteLine('DisableMotionBlur=%d' % scriptDialog.GetValue('DisableMoBlur'))
     
 

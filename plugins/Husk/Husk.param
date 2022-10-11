@@ -3,7 +3,7 @@ Type=label
 Label=About
 Category=About Plugin
 CategoryOrder=-1
-Default=Husk USD Standalone renderer v0.1b
+Default=Husk USD Standalone renderer v0.2b
 Description=Not configurable
 
 [Author]
