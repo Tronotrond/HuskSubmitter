@@ -121,25 +121,35 @@ def __main__(*args):
     scriptDialog.AddControlToGrid( "FramesLabel", "LabelControl", "Frame List", 2, 0, "The frame range to render.", False )
     scriptDialog.AddControlToGrid( "FramesBox", "TextControl", "", 2, 1 )
 
-    resOverrideBox = scriptDialog.AddSelectionControlToGrid( "ResOverrideBox", "CheckBoxControl", False, "Override Resolution", 11, 0, "If enabled, resolution will be overwritten with the values specified." )
+    resOverrideBox = scriptDialog.AddSelectionControlToGrid( "ResOverrideBox", "CheckBoxControl", False, "Override Resolution", 3, 0, "If enabled, resolution will be overwritten with the values specified." )
     resOverrideBox.ValueModified.connect( enableResOverride )
 
-    scriptDialog.AddControlToGrid( "WidthLabel", "LabelControl", "Width", 12, 0, "Width of the image." )
-    scriptDialog.AddRangeControlToGrid( "WidthBox", "RangeControl", 1280, 1, 50000, 0, 1, 12, 1, "Width" )
+    scriptDialog.AddControlToGrid( "WidthLabel", "LabelControl", "Width", 4, 0, "Width of the image." )
+    scriptDialog.AddRangeControlToGrid( "WidthBox", "RangeControl", 1280, 1, 50000, 0, 1, 4, 1, "Width" )
     scriptDialog.SetEnabled( "WidthLabel", False )
     scriptDialog.SetEnabled( "WidthBox", False )
     
-    scriptDialog.AddControlToGrid( "HeightLabel", "LabelControl", "Height", 12, 2, "Height of the image." )
-    scriptDialog.AddRangeControlToGrid( "HeightBox", "RangeControl", 720, 1, 50000, 0, 1, 12, 3, "Height" )
+    scriptDialog.AddControlToGrid( "HeightLabel", "LabelControl", "Height", 4, 2, "Height of the image." )
+    scriptDialog.AddRangeControlToGrid( "HeightBox", "RangeControl", 720, 1, 50000, 0, 1, 4, 3, "Height" )
     scriptDialog.SetEnabled( "HeightLabel", False )
     scriptDialog.SetEnabled( "HeightBox", False )
 
-    scriptDialog.AddControlToGrid( "ImageOutputLabel", "LabelControl", "Image Output Directory", 4, 0, "Custom rendering output path.", False )
-    scriptDialog.AddSelectionControlToGrid( "ImageOutputBox", "FolderBrowserControl", "", "", 4, 1, colSpan=3 )
+    scriptDialog.AddControlToGrid( "ImageOutputLabel", "LabelControl", "Image Output Directory", 5, 0, "Custom rendering output path.", False )
+    scriptDialog.AddSelectionControlToGrid( "ImageOutputBox", "FolderBrowserControl", "", "", 5, 1, colSpan=3 )
 
-    scriptDialog.AddSelectionControlToGrid( "DisableMoBlur", "CheckBoxControl", False, "Disable Motion Blur", 13, 0, "If enabled, motion blur will be disabled in renderer." )
-
-
+    #Will add this back in later - not working at the moment
+    #scriptDialog.AddSelectionControlToGrid( "DisableMoBlur", "CheckBoxControl", False, "Disable Motion Blur", 13, 0, "If enabled, motion blur will be disabled in renderer." )
+    
+    OverrideRenderDelegate = scriptDialog.AddSelectionControlToGrid( "OverrideRenderDelegate", "CheckBoxControl", False, "Custom Render Delegate", 6, 0, "Check to set custom render delegate/engine." )
+    OverrideRenderDelegate.ValueModified.connect( delegateEnable )
+    scriptDialog.AddControlToGrid( "RenderDelegate", "TextControl", "Redshift", 6, 1 )
+    #Text field input for now. Implement dropdown box later (pull delegates from file)
+    #scriptDialog.AddControlToGrid( "RenderBox", "GroupComboControl", "Karma, Redshift", 14, 1 )
+    scriptDialog.SetEnabled( "RenderDelegate", False )
+    
+    scriptDialog.AddControlToGrid( "LogLabel", "LabelControl", "Log Level", 7, 0, "Set log level. Default 2, above 8 can impact performance", False )
+    scriptDialog.AddRangeControlToGrid( "LogLevel", "RangeControl", 2, 0, 9, 0, 1, 7, 1 )
+    
     scriptDialog.EndGrid()
     scriptDialog.EndTabPage()
     
@@ -161,6 +171,7 @@ def __main__(*args):
     FileLoaded()
     scriptDialog.ShowDialog( False )
     
+    
 def enableResOverride( *args ):
     # type: (*CheckBoxControl) -> None
     global scriptDialog
@@ -169,6 +180,14 @@ def enableResOverride( *args ):
     scriptDialog.SetEnabled( "WidthBox", resOverride )
     scriptDialog.SetEnabled( "HeightLabel", resOverride )
     scriptDialog.SetEnabled( "HeightBox", resOverride )
+
+
+def delegateEnable( *args ):
+    # type: (*CheckBoxControl) -> None
+    global scriptDialog
+    resOverride = scriptDialog.GetValue( "OverrideRenderDelegate" )
+    scriptDialog.SetEnabled( "RenderDelegate", resOverride )
+
 
 def PathDict(path):
     regex = r'(?P<drive>[A-Z]:\/)(?P<path>.*\/)(?P<file>.*)(?P<ext>\..*)$'
@@ -296,7 +315,7 @@ def FileLoaded( *args ):
         # Get image output path
         if product != None:
             disablemb = product.GetAttribute('disableMotionBlur')
-            scriptDialog.SetValue('DisableMoBlur', disablemb)
+            # scriptDialog.SetValue('DisableMoBlur', disablemb)
             # Output image path is evaluated at given frame. ProcessOuputPath detects where the frame is in the path            
             # Will then process, detect and replace the frame number with expression
             productName = product.GetAttribute('productName').Get(int(endfr))
@@ -406,9 +425,10 @@ def SubmitButtonPressed(*args):
     writer.WriteLine('OverrideResolution=%d' % scriptDialog.GetValue('ResOverrideBox'))
     writer.WriteLine('Width=%d' % scriptDialog.GetValue('WidthBox'))
     writer.WriteLine('Height=%d' % scriptDialog.GetValue('HeightBox'))
-    #Implement this in submitter later - can be changed in job properties for now
-    writer.WriteLine('LogLevel=2')
-    writer.WriteLine('DisableMotionBlur=%d' % scriptDialog.GetValue('DisableMoBlur'))
+    writer.WriteLine('LogLevel=%d' % scriptDialog.GetValue('LogLevel'))
+    writer.WriteLine('OverrideRenderDelegate=%d' % scriptDialog.GetValue('OverrideRenderDelegate'))
+    writer.WriteLine('RenderDelegate=%s' % scriptDialog.GetValue('RenderDelegate'))
+    #writer.WriteLine('DisableMotionBlur=%d' % scriptDialog.GetValue('DisableMoBlur'))
     
 
     writer.Close()
