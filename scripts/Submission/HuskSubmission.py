@@ -314,6 +314,9 @@ def FileLoaded( *args ):
             resolution = rendersettings.GetAttribute('resolution').Get()
             scriptDialog.SetValue('WidthBox', resolution[0])
             scriptDialog.SetValue('HeightBox', resolution[1])
+
+        # Updated method of grabbing output file name
+        rnd_output_file = stage.GetPropertyAtPath('/Render/Products/renderproduct.productName').Get()
         
         # Get image output path
         if product != None:
@@ -326,6 +329,9 @@ def FileLoaded( *args ):
             
             # Process path and return dictionary with useful data
             outdata = ProcessOuputPath(outpath, frameToCompare=str(int(endfr)))
+
+            if rnd_output_file != None:
+                outpath = FixPath(rnd_output_file, rem_spaces=0)
             
             if outdata != None:
                 outputFile = outdata['fullpath']
