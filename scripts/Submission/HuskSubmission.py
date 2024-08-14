@@ -150,8 +150,8 @@ def __main__(*args):
     scriptDialog.AddControlToGrid( "ArgLabel", "LabelControl", "Custom Render Arguments", 7, 0, "Set any additional command line arguments to pass to Husk", False )
     scriptDialog.AddControlToGrid( "CustomArgs", "TextControl", "", 7, 1 )
     
-    scriptDialog.AddControlToGrid( "LogLabel", "LabelControl", "Log Level", 8, 0, "Set log level. Default 2, above 8 can impact performance", False )
-    scriptDialog.AddRangeControlToGrid( "LogLevel", "RangeControl", 2, 0, 9, 0, 1, 8, 1 )
+    scriptDialog.AddControlToGrid( "LogLabel", "LabelControl", "Log Level", 8, 0, "Set log level. Default 6, above 8 can impact performance", False )
+    scriptDialog.AddRangeControlToGrid( "LogLevel", "RangeControl", 6, 0, 9, 0, 1, 8, 1 )
     
     scriptDialog.EndGrid()
     scriptDialog.EndTabPage()
@@ -317,13 +317,17 @@ def FileLoaded( *args ):
 
         # Updated method of grabbing output file name
         rnd_output_file = stage.GetPropertyAtPath('/Render/Products/renderproduct.productName').Get()
+        outputFile = FixPath(rnd_output_file, rem_spaces=0)
+        scriptDialog.SetValue('ImageOutputBox', outputFile)
         
         # Get image output path
         if product != None:
             disablemb = product.GetAttribute('disableMotionBlur')
             # scriptDialog.SetValue('DisableMoBlur', disablemb)
             # Output image path is evaluated at given frame. ProcessOuputPath detects where the frame is in the path            
-            # Will then process, detect and replace the frame number with expression
+            # Will then process, detect and replace the frame number with expression    
+            
+            ''' OLD METHOD
             productName = product.GetAttribute('productName').Get(int(endfr))
             outpath = FixPath(productName, rem_spaces=0)
             
@@ -337,7 +341,7 @@ def FileLoaded( *args ):
                 outputFile = outdata['fullpath']
                 #Update UI with path
                 scriptDialog.SetValue('ImageOutputBox', outputFile)
-        
+            '''
     
 def SubmitButtonPressed(*args):
    # type: (*ButtonControl) -> None
