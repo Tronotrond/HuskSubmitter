@@ -18,6 +18,7 @@ def CleanupDeadlinePlugin(deadlinePlugin):
 class HuskPlugin(DeadlinePlugin):
     """This is the main DeadlinePlugin class for Husk."""
     def __init__(self):
+        super().__init__()  # Call the parent class constructor
         """Hook up the callbacks in the constructor."""
         self.InitializeProcessCallback += self.InitializeProcess
         self.RenderExecutableCallback += self.RenderExecutable
