@@ -76,12 +76,17 @@ class HuskPlugin(DeadlinePlugin):
         renderdelegate = self.GetPluginInfoEntry('RenderDelegate')
         customargs = self.GetPluginInfoEntry('CustomArguments')
         logLevel = self.GetPluginInfoEntry('LogLevel')
-        
-        frameNumber = self.GetStartFrame()
+
+        # Added better handling of Deadline ChunkSize > 1, avoiding reloading the plugin and assets for each frame
+        startFrame = self.GetStartFrame()
+        endFrame = self.GetEndFrame()
+        chunk = self.GetJobInfoEntry('ChunkSize')
         
         arguments += usdFile + ' ' 
         arguments += '--verbose a{} '.format(logLevel)
         arguments += '--frame {} '.format(frameNumber)
+        arguments += '--frame-count {} '.format(chunk)
+        
         if overrideres:
             arguments += '--res {0} {1} '.format(width, height)
         if overriderender:
