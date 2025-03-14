@@ -84,7 +84,7 @@ class HuskPlugin(DeadlinePlugin):
         
         arguments += usdFile + ' ' 
         arguments += '--verbose a{} '.format(logLevel)
-        arguments += '--frame {} '.format(frameNumber)
+        arguments += '--frame {} '.format(startFrame)
         arguments += '--frame-count {} '.format(chunk)
         
         if overrideres:
