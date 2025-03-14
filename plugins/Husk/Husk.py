@@ -35,7 +35,8 @@ class HuskPlugin(DeadlinePlugin):
     def InitializeProcess(self):
         """Called by Deadline to initialize the plugin."""
         # Set the plugin specific settings.
-        self.SingleFramesOnly=True
+        # Set SingleFramesOnly to false to handle new multi frame rendering
+        self.SingleFramesOnly=False
         self.StdoutHandling=True
         #self.PopupHandling=True
         self.PluginType = PluginType.Simple
