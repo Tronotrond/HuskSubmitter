@@ -81,7 +81,10 @@ class HuskPlugin(DeadlinePlugin):
         # Added better handling of Deadline ChunkSize > 1, avoiding reloading the plugin and assets for each frame
         startFrame = self.GetStartFrame()
         endFrame = self.GetEndFrame()
-        chunk = self.GetJobInfoEntry('ChunkSize')
+        chunk = int(self.GetJobInfoEntry('ChunkSize'))  # Ensure chunk is treated as an integer
+        totalFrames = endFrame - startFrame + 1  # Compute total frames
+        
+        chunk = min(totalFrames, chunk)  # Ensure chunk isn't larger than total frames
         
         arguments += usdFile + ' ' 
         arguments += '--verbose a{} '.format(logLevel)
