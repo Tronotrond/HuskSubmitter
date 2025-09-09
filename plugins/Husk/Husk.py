@@ -29,25 +29,39 @@ class HuskPlugin(DeadlinePlugin):
 		
 	# ---------- ENV HELPERS ----------
 
-	def _get_env_text_for_worker(self):
-		"""Resolve the correct env text for this Worker OS.
-		Order (first non-empty wins, then concatenates the rest in order):
-		  1) per-job OS-specific (ExtraEnvWindows/Linux/OSX)
-		  2) per-job common (ExtraEnv)
-		  3) global OS-specific (.param)
-		  4) global common (.param)
-		"""
-		if SystemUtils.IsRunningOnWindows():
-			os_suffix = "Windows"
-		elif SystemUtils.IsRunningOnOSX():
-			os_suffix = "OSX"
-		else:
-			os_suffix = "Linux"
+	
+	def _detect_os(self):
+		"""Return one of: 'Windows', 'Linux', 'OSX'."""
+		try:
+			if hasattr(SystemUtils, "IsRunningOnWindows") and SystemUtils.IsRunningOnWindows():
+				return "Windows"
+			if hasattr(SystemUtils, "IsRunningOnLinux") and SystemUtils.IsRunningOnLinux():
+				return "Linux"
+			# Some Deadline versions expose IsRunningOnOSX, others IsRunningOnMac
+			if hasattr(SystemUtils, "IsRunningOnOSX") and SystemUtils.IsRunningOnOSX():
+				return "OSX"
+			if hasattr(SystemUtils, "IsRunningOnMac") and SystemUtils.IsRunningOnMac():
+				return "OSX"
+		except Exception:
+			pass
 
-		# Per-job first
+		# Fallback to stdlib
+		sysname = platform.system()
+		if sysname == "Windows":
+			return "Windows"
+		if sysname == "Darwin":
+			return "OSX"
+		return "Linux"
+
+	def _get_env_text_for_worker(self):
+		"""Pick the right env blocks for this Worker OS, then concatenate."""
+		os_suffix = self._detect_os()
+
+		# Per-job first (from .options)
 		job_os  = self.GetPluginInfoEntryWithDefault(f"ExtraEnv{os_suffix}", "")
 		job_any = self.GetPluginInfoEntryWithDefault("ExtraEnv", "")
-		# Global fallback
+
+		# Global fallback (from .param)
 		cfg_os  = self.GetConfigEntryWithDefault(f"ExtraEnv{os_suffix}", "")
 		cfg_any = self.GetConfigEntryWithDefault("ExtraEnv", "")
 
@@ -62,7 +76,6 @@ class HuskPlugin(DeadlinePlugin):
 			line = raw.strip()
 			if not line or line.startswith('#') or line.startswith(';'):
 				continue
-			# allow KEY=VALUE;KEY2=VALUE2 on one line too
 			chunks = [p for p in line.split(';') if p.strip()] if ';' in line else [line]
 			for p in chunks:
 				if '=' not in p:
@@ -79,12 +92,13 @@ class HuskPlugin(DeadlinePlugin):
 	def _set_env_vars(self):
 		block = self._get_env_text_for_worker()
 		if not block:
+			self.LogInfo("No ExtraEnv entries found for this OS.")
 			return
 
 		env_map = self._parse_env_block(block)
 		for k, v in env_map.items():
-			v = RepositoryUtils.CheckPathMapping(v)   # repo path/OS mapping
-			v = os.path.expandvars(v)                 # expand %FOO% / $FOO
+			v = RepositoryUtils.CheckPathMapping(v)
+			v = os.path.expandvars(v)
 
 			# Optional: append semantics for PATH-like vars
 			if k.upper() in ("PATH", "PYTHONPATH", "HOUDINI_PATH"):
@@ -92,11 +106,9 @@ class HuskPlugin(DeadlinePlugin):
 				if existing:
 					v = existing + os.pathsep + v
 
-			# Set for child render process and this plugin host
 			self.SetProcessEnvironmentVariable(k, v)
 			os.environ[k] = v
 
-			# Redact secrets in logs
 			redacted = ("*" * 8) if any(s in k.upper() for s in ("PASS", "TOKEN", "SECRET", "KEY")) else v
 			self.LogInfo("ENV set for render process: {}={}".format(k, redacted))
 
