@@ -27,22 +27,78 @@ class HuskPlugin(DeadlinePlugin):
 		self.RenderArgumentCallback += self.RenderArgument	
 		
 		
-	def _set_env_vars(self):
-		# EITHER: read global Plugin Configuration value from .param
-		block = self.GetConfigEntryWithDefault("ExtraEnv", "")
-		# OR: read per-job value from .options / PluginInfo
-		# block = self.GetPluginInfoEntryWithDefault("ExtraEnv", "")
+	# ---------- ENV HELPERS ----------
 
+	def _get_env_text_for_worker(self):
+		"""Resolve the correct env text for this Worker OS.
+		Order (first non-empty wins, then concatenates the rest in order):
+		  1) per-job OS-specific (ExtraEnvWindows/Linux/OSX)
+		  2) per-job common (ExtraEnv)
+		  3) global OS-specific (.param)
+		  4) global common (.param)
+		"""
+		if SystemUtils.IsRunningOnWindows():
+			os_suffix = "Windows"
+		elif SystemUtils.IsRunningOnOSX():
+			os_suffix = "OSX"
+		else:
+			os_suffix = "Linux"
+
+		# Per-job first
+		job_os  = self.GetPluginInfoEntryWithDefault(f"ExtraEnv{os_suffix}", "")
+		job_any = self.GetPluginInfoEntryWithDefault("ExtraEnv", "")
+		# Global fallback
+		cfg_os  = self.GetConfigEntryWithDefault(f"ExtraEnv{os_suffix}", "")
+		cfg_any = self.GetConfigEntryWithDefault("ExtraEnv", "")
+
+		parts = [job_os, job_any, cfg_os, cfg_any]
+		return "\n".join(t for t in parts if t and t.strip())
+
+	def _parse_env_block(self, text):
+		env = {}
+		if not text:
+			return env
+		for raw in text.splitlines():
+			line = raw.strip()
+			if not line or line.startswith('#') or line.startswith(';'):
+				continue
+			# allow KEY=VALUE;KEY2=VALUE2 on one line too
+			chunks = [p for p in line.split(';') if p.strip()] if ';' in line else [line]
+			for p in chunks:
+				if '=' not in p:
+					self.LogWarning("Skipping invalid env spec: {}".format(p))
+					continue
+				k, v = p.split('=', 1)
+				k, v = k.strip(), v.strip()
+				# strip surrounding quotes
+				if len(v) >= 2 and ((v[0] == v[-1] == '"') or (v[0] == v[-1] == "'")):
+					v = v[1:-1]
+				env[k] = v
+		return env
+
+	def _set_env_vars(self):
+		block = self._get_env_text_for_worker()
 		if not block:
 			return
 
-		env_map = _parse_env_block(block, self.LogWarning)
+		env_map = self._parse_env_block(block)
 		for k, v in env_map.items():
-			# Map any repo path tokens or OS path translations
-			v = RepositoryUtils.CheckPathMapping(v)  # maps \\server/win to /mnt/server on Linux, etc.
-			v = os.path.expandvars(v)                # expand %FOO% / $FOO if present
-			self.SetProcessEnvironmentVariable(k, v) # applies to processes launched by this plugin
-			self.LogInfo("ENV set for render process: {}={}".format(k, v))
+			v = RepositoryUtils.CheckPathMapping(v)   # repo path/OS mapping
+			v = os.path.expandvars(v)                 # expand %FOO% / $FOO
+
+			# Optional: append semantics for PATH-like vars
+			if k.upper() in ("PATH", "PYTHONPATH", "HOUDINI_PATH"):
+				existing = os.environ.get(k)
+				if existing:
+					v = existing + os.pathsep + v
+
+			# Set for child render process and this plugin host
+			self.SetProcessEnvironmentVariable(k, v)
+			os.environ[k] = v
+
+			# Redact secrets in logs
+			redacted = ("*" * 8) if any(s in k.upper() for s in ("PASS", "TOKEN", "SECRET", "KEY")) else v
+			self.LogInfo("ENV set for render process: {}={}".format(k, redacted))
 
 	def Cleanup(self):
 		for stdoutHandler in self.StdoutHandlers:
@@ -147,19 +203,7 @@ class HuskPlugin(DeadlinePlugin):
 		self.FailRender(self.GetRegexMatch(0))
 
 
-def _parse_env_block(text, log):
-	env = {}
-	for raw in text.splitlines():
-		line = raw.strip()
-		if not line or line.startswith('#') or line.startswith(';'):
-			continue
-		# allow KEY=VALUE;KEY2=VALUE2 on one line too
-		parts = [p for p in line.split(';') if p.strip()] if ';' in line else [line]
-		for p in parts:
-			if '=' not in p:
-				log("Skipping invalid env spec: {}".format(p))
-				continue
-			k, v = p.split('=', 1)
+
 			env[k.strip()] = v.strip()
 	return env
 

@@ -20,9 +20,27 @@ Label=Houdini Husk Executable
 Default=C:\Program Files\Side Effects Software\Houdini 19.5.303\bin\husk.exe;/opt/hfs19.5/bin/husk
 Description=The path to the husk executable within your Houdini installation directory.
 
-[ExtraEnv]
-Label=Extra Environment Variables
+[ExtraEnvWindows]
 Type=MultiLineString
-Category=Environment
+Label=Extra Environment (Windows)
 Default=
-Description=One KEY=VALUE per line. Lines starting with # are ignored.
+Description=One KEY=VALUE per line for Windows Workers.
+
+[ExtraEnvLinux]
+Type=MultiLineString
+Label=Extra Environment (Linux)
+Default=
+Description=One KEY=VALUE per line for Linux Workers.
+
+[ExtraEnvOSX]
+Type=MultiLineString
+Label=Extra Environment (macOS)
+Default=
+Description=One KEY=VALUE per line for macOS Workers. (Optional)
+
+[ExtraEnv]
+Type=MultiLineString
+Label=Extra Environment (Common)
+Default=
+Description=Applied on all platforms, after the OS-specific block.
+
