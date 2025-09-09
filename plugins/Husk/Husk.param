@@ -3,7 +3,7 @@ Type=label
 Label=About
 Category=About Plugin
 CategoryOrder=-1
-Default=Husk USD Standalone renderer v0.2b
+Default=Husk USD Standalone renderer v0.8b
 Description=Not configurable
 
 [Author]
@@ -20,3 +20,9 @@ Label=Houdini Husk Executable
 Default=C:\Program Files\Side Effects Software\Houdini 19.5.303\bin\husk.exe;/opt/hfs19.5/bin/husk
 Description=The path to the husk executable within your Houdini installation directory.
 
+[ExtraEnv]
+Label=Extra Environment Variables
+Type=MultiLineString
+Category=Environment
+Default=
+Description=One KEY=VALUE per line. Lines starting with # are ignored.

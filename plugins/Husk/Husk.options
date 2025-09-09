@@ -62,12 +62,22 @@ Description=Name of render delegate.
 Required=false
 DisableIfBlank=true
 
+[RenderPass]
+Type=string
+Label=Render pass
+Category=Render Options
+CategoryOrder=1
+Index=5
+Description=Optional Render Pass Primitive
+Required=false
+DisableIfBlank=true
+
 [CustomArguments]
 Type=string
 Label=Custom Additional Render Arguments
 Category=Render Options
 CategoryOrder=1
-Index=4
+Index=6
 Description=Additional render arguments to pass to husk.
 Required=false
 DisableIfBlank=true
