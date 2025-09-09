@@ -102,7 +102,7 @@ class HuskPlugin(DeadlinePlugin):
 
 	def Cleanup(self):
 		for stdoutHandler in self.StdoutHandlers:
-			del stdoutHandler.HandleCallback
+		del stdoutHandler.HandleCallback
 		
 		del self.InitializeProcessCallback
 		del self.RenderExecutableCallback
@@ -206,4 +206,5 @@ class HuskPlugin(DeadlinePlugin):
 
 			env[k.strip()] = v.strip()
 	return env
+
 
