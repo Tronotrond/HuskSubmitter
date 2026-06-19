@@ -173,6 +173,8 @@ class HuskPlugin(DeadlinePlugin):
 		except:
 			renderpass = ""
 		customargs = self.GetPluginInfoEntry('CustomArguments')
+		customargs = RepositoryUtils.CheckPathMapping(customargs)  # apply path mapping
+		
 		logLevel = self.GetPluginInfoEntry('LogLevel')
 
 		# Get the frame range for the chunk
