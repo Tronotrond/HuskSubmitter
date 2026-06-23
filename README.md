@@ -18,7 +18,6 @@ Redshift Standalone submitter shipped with Deadline.
 
 # Requirements:
 - Python, developed and tested with Python 3.7.
-	- Currently doesn't seem to work with Python greater than Python 3.8
 - usd-core Python API: https://pypi.org/project/usd-core/
 - Thinkbox Deadline, PY3 version: https://www.awsthinkbox.com/
 - Python and libraries needs to be installed on any computer you submit from.
@@ -31,13 +30,32 @@ Redshift Standalone submitter shipped with Deadline.
 - Deadline Shows a PXR related module error:
 	- I've seen errors happening on version 10.1.19.x. Upgrading to Deadline 10.1.20 or never with Python3 seems to work. Also make sure Python Sandbox version is set to 3 in the repository options
 
+# Tile Rendering (Distributed)
+The Houdini HDA submitter supports two tiling modes via the `tile_mode` parameter:
+
+- **Auto-tile (mode 0):** husk renders all tiles in a single process and stitches
+  them itself (`--autotile`). Useful for reducing peak memory on one machine. This
+  stays a single Deadline job, no assembly needed.
+- **Distributed (mode 1):** the image is split into `custom_tilesx` x `custom_tilesy`
+  tiles. A single render job is submitted whose *tasks are tiles* (task N renders
+  tile N via `--tile-count`/`--tile-index`/`--tile-suffix`), followed by a dependent
+  assembly job that stitches the tiles into the final frame with `itilestitch`.
+
+Notes:
+- Distributed tiling is **single frame only**. If a frame range is set, the submitter
+  warns and falls back to the current frame.
+- The assembly job runs under the Husk plugin and resolves `itilestitch` as a sibling
+  of the configured husk executable, so it works on a mixed Windows/Linux farm and
+  respects Deadline path mapping. No separate executable configuration is required.
+- If the `cleanup_tiles` parameter is enabled, a third job (dependent on the assembly
+  job) removes the per-tile image files once stitching has completed. It deletes the
+  known tile files directly in Python, so it is OS-agnostic across a mixed farm.
+
 # To-do:
 - Implement saving and exposing as many render settings as possible to Deadline.
 	- Change between Karma XPU/CPU 
 	- Change Path Tracing or Pixel Samples 
 	- Change Limits 
-- Houdini Submitter ROP 
-	- Option to export .usd scene on submission
-	- Option to submit .usd export job to farm and render job as a dependent job.
-	- Options for separate groups and settings for .usd export and render job. 
+- Distributed tile rendering across a frame *range* (currently single-frame only).
+
 

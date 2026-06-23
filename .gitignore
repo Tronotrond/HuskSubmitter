@@ -1,3 +1,13 @@
 *.bak
 PublishToDeadline.bat
 CopyFromDeadline.bat
+
+# Claude Code / AI assistant files
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
+
+# Python
+__pycache__/
+*.py[cod]

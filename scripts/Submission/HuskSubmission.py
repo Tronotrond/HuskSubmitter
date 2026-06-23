@@ -192,58 +192,6 @@ def delegateEnable( *args ):
     scriptDialog.SetEnabled( "RenderDelegate", resOverride )
 
 
-def PathDict(path):
-    regex = r'(?P<drive>[A-Z]:\/)(?P<path>.*\/)(?P<file>.*)(?P<ext>\..*)$'
-    pat = re.compile(regex)
-    result = pat.match(path)
-    data = result.groupdict() 
-    
-    return data
-
-def ProcessOuputPath(path, frameToCompare='00', new_frame_expression='$F'):
-    # Builds a dictionary from path and detects where the frame number is located
-    # Regex break up path:  (?P<drive>[A-Z]:\/)(?P<path>.*\/)(?P<file>.*)(?P<ext>\..*)$
-    # Regex find frames:    (?P<file>.*)(?P<frame>(?<=\D)(0*COMPAREFRAME))(?P<filecont>$|\D.*)
-    # Assumption: Last group match found in filename is the frames
-    
-    
-    regex = r'(?P<drive>[A-Z]:\/)(?P<path>.*\/)(?P<file>.*)(?P<ext>\..*)$'
-    pat = re.compile(regex)
-    result = pat.match(path)
-    if result == None: 
-        print('Regex could not detect or match ouput path')
-        return 
-    data = result.groupdict() 
-     
-    file = data['file']
-    regex = r'(?P<file>.*)(?P<frame>(?<=\D)(0*' + str(frameToCompare) + r'))(?P<filecont>$|\D.*)'
-    
-    pat = re.compile(regex)
-    result = pat.match(file)
-    
-    if result == None: 
-        print('Regex could not detect or match frame sequence in file name\nDeadline path remapping does not work with internal USD outputs\nPlease manually set output path if needed.\n')
-        return 
-    
-    filedata = result.groupdict() 
-   
-    data['padding'] = len(filedata['frame'])
-    # Replace frame number with a temporary string that can be replaced later
-    data['frame_holder'] = r'###frames###'
-    data['file'] = filedata['file'] + data['frame_holder'] + filedata['filecont']
-
-    # Replace temp frame holder with expression
-    newFrExpr = new_frame_expression +  str(data['padding'])
-    filename = str(data['file'])
-    filename = filename.replace(data['frame_holder'], newFrExpr)
-    data['file'] = filename
-    
-    #Build full output path and filename
-    data['fullpath'] = data['drive'] + data['path'] + data['file'] + data['ext']
-
-    return data
-
-
 def GetSettingsFilename():
     # type: () -> str
     return os.path.join(ClientUtils.GetUsersSettingsDirectory(), 'HuskSettings.ini')
@@ -284,9 +232,10 @@ def FileLoaded( *args ):
             return
         print('USD file loaded')
 
-        # Set job name to scene file name
-        filedict = PathDict(filename)
-        scriptDialog.SetValue('NameBox', filedict['file'])
+        # Set job name to scene file name (without directory or extension).
+        # Use a path-agnostic split so UNC/Linux paths work, not just X:/ drives.
+        jobName = os.path.splitext(os.path.basename(filename))[0]
+        scriptDialog.SetValue('NameBox', jobName)
 
         # Get start and end frame
         startfr = stage.GetStartTimeCode()
@@ -315,33 +264,13 @@ def FileLoaded( *args ):
             scriptDialog.SetValue('WidthBox', resolution[0])
             scriptDialog.SetValue('HeightBox', resolution[1])
 
-        # Updated method of grabbing output file name
-        rnd_output_file = stage.GetPropertyAtPath('/Render/Products/renderproduct.productName').Get()
-        outputFile = FixPath(rnd_output_file, rem_spaces=0)
-        scriptDialog.SetValue('ImageOutputBox', outputFile)
-        
-        # Get image output path
+        # Grab the output file name from the RenderProduct prim discovered above,
+        # rather than assuming a hardcoded /Render/Products/renderproduct path.
         if product != None:
-            disablemb = product.GetAttribute('disableMotionBlur')
-            # scriptDialog.SetValue('DisableMoBlur', disablemb)
-            # Output image path is evaluated at given frame. ProcessOuputPath detects where the frame is in the path            
-            # Will then process, detect and replace the frame number with expression    
-            
-            ''' OLD METHOD
-            productName = product.GetAttribute('productName').Get(int(endfr))
-            outpath = FixPath(productName, rem_spaces=0)
-            
-            # Process path and return dictionary with useful data
-            outdata = ProcessOuputPath(outpath, frameToCompare=str(int(endfr)))
-
-            if rnd_output_file != None:
-                outpath = FixPath(rnd_output_file, rem_spaces=0)
-            
-            if outdata != None:
-                outputFile = outdata['fullpath']
-                #Update UI with path
+            rnd_output_file = product.GetAttribute('productName').Get()
+            if rnd_output_file:
+                outputFile = FixPath(rnd_output_file, rem_spaces=0)
                 scriptDialog.SetValue('ImageOutputBox', outputFile)
-            '''
     
 def SubmitButtonPressed(*args):
    # type: (*ButtonControl) -> None
