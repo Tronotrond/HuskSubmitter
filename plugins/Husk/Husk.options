@@ -84,15 +84,50 @@ DisableIfBlank=true
 
 [PixelSamples]
 Type=integer
-Minimum=1
-Label=PixelSamples
+Minimum=0
+Label=Pixel Samples
 Category=Render Options
 CategoryOrder=1
-Index=1
-Description=Override Rendering Pixel Samples 
+Index=7
+Description=Override pixel samples per pixel (husk -p). 0 = use the value from the USD render settings (no override).
+Required=false
+DisableIfBlank=false
+Default=0
+
+[KarmaEngine]
+Type=enum
+Values=Default;cpu;xpu
+Label=Karma Engine
+Category=Render Options
+CategoryOrder=1
+Index=8
+Description=Override the Karma rendering engine (husk --engine). Default leaves the engine unchanged. Only applies to the Karma render delegate.
+Required=false
+DisableIfBlank=false
+Default=Default
+
+[ResScale]
+Type=integer
+Minimum=0
+Maximum=100
+Label=Resolution Scale %
+Category=Render Options
+CategoryOrder=1
+Index=9
+Description=Scale output resolution by this percentage (husk --res-scale). 0 or 100 = full resolution (no override). Useful for quick low-res requeues.
+Required=false
+DisableIfBlank=false
+Default=0
+
+[CameraOverride]
+Type=string
+Label=Camera Prim Override
+Category=Render Options
+CategoryOrder=1
+Index=10
+Description=Render from this camera primitive path instead of the one in the render settings (husk -c). Blank = no override.
 Required=false
 DisableIfBlank=true
-Default=256
 
 [ImageOutputDirectory]
 Type=folder
@@ -110,9 +145,9 @@ Type=boolean
 Label=Disable Motion Blur
 Category=Render Options
 CategoryOrder=1
-Index=
-Description=If enabled, motion blur will be disabled.
-Required=true
+Index=11
+Description=If enabled, motion blur will be disabled (husk --disable-motionblur).
+Required=false
 DisableIfBlank=false
 Default=false
 

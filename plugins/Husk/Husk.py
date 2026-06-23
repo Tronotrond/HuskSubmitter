@@ -251,6 +251,47 @@ class HuskPlugin(DeadlinePlugin):
 			arguments += ' "{}"'.format(tf)
 		return arguments
 
+	def _optional_overrides(self):
+		"""Build husk args for the optional, post-submission Job Properties.
+
+		Returns a (possibly empty) string. Each setting is only emitted when it
+		represents a real override, so a freshly submitted job with all defaults
+		produces no extra arguments.
+		"""
+		args = ''
+
+		# Karma engine: cpu / xpu (only meaningful for the Karma delegate).
+		engine = self.GetPluginInfoEntryWithDefault('KarmaEngine', 'Default').strip()
+		if engine and engine.lower() != 'default':
+			args += '--engine {} '.format(engine.lower())
+
+		# Pixel samples: 0 means "leave as authored in the USD".
+		try:
+			samples = int(self.GetPluginInfoEntryWithDefault('PixelSamples', '0'))
+		except ValueError:
+			samples = 0
+		if samples > 0:
+			args += '--pixel-samples {} '.format(samples)
+
+		# Resolution scale percentage: 0 or 100 means full resolution.
+		try:
+			resScale = int(self.GetPluginInfoEntryWithDefault('ResScale', '0'))
+		except ValueError:
+			resScale = 0
+		if 0 < resScale < 100:
+			args += '--res-scale {} '.format(resScale)
+
+		# Camera prim override.
+		camera = self.GetPluginInfoEntryWithDefault('CameraOverride', '').strip()
+		if camera:
+			args += '-c "{}" '.format(camera)
+
+		# Disable motion blur toggle.
+		if self._get_bool('DisableMotionBlur'):
+			args += '--disable-motionblur '
+
+		return args
+
 	def RenderArgument(self):
 		if self._get_bool('AssemblyJob'):
 			return self.AssemblyArgument()
@@ -323,6 +364,12 @@ class HuskPlugin(DeadlinePlugin):
 			arguments += '--pass {0} '.format(renderpass)
 		if overriderender:
 			arguments += '-R {0} '.format(renderdelegate)
+
+		# Optional post-submission overrides. Each is editable per-job in the
+		# Monitor's Job Properties; a blank/zero/Default value means "no override"
+		# so existing jobs are unaffected.
+		arguments += self._optional_overrides()
+
 		arguments += customargs + ' '
 		arguments += '-o "{}"'.format(outFile)
 		arguments += ' --make-output-path' + ' '
