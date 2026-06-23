@@ -141,8 +141,15 @@ class HuskPlugin(DeadlinePlugin):
 		self.StdoutHandling = True
 		self.PluginType = PluginType.Simple
 
+		# husk's bracketed "[HH:MM:SS] 39.9% (...)" line is the authoritative
+		# overall progress. ALF_PROGRESS accumulates per tile and overshoots 100%,
+		# so once we've seen a real percentage we stop trusting ALF_PROGRESS.
+		self._sawRealProgress = False
+
 		# Progress updates
 		self.AddStdoutHandlerCallback('ALF_PROGRESS ([0-9]+)').HandleCallback += self.HandleStdoutProgress
+		# Authoritative overall percentage, e.g. "[18:25:20]  39.9% (9/21, 40.0%)"
+		self.AddStdoutHandlerCallback(r'\]\s+([0-9]*\.?[0-9]+)%').HandleCallback += self.HandleStdoutPercentage
 		# Detect Errors
 		self.AddStdoutHandlerCallback('Error:(.*)').HandleCallback += self.HandleStdoutError
 		self.AddStdoutHandlerCallback('USD ERROR(.*)').HandleCallback += self.HandleStdoutError
@@ -328,16 +335,27 @@ class HuskPlugin(DeadlinePlugin):
 
 		return arguments
 
-	def HandleStdoutProgress(self):
-		self.SetStatusMessage(self.GetRegexMatch(0))
-		# husk's ALF_PROGRESS can exceed 100% (it accumulates across tiles/buckets
-		# rather than normalizing to the final image), so clamp to a sane 0-100.
+	def HandleStdoutPercentage(self):
+		"""Authoritative overall progress from husk's bracketed status line."""
 		try:
 			progress = float(self.GetRegexMatch(1))
 		except ValueError:
 			return
-		progress = max(0.0, min(100.0, progress))
-		self.SetProgress(progress)
+		self._sawRealProgress = True
+		self.SetProgress(max(0.0, min(100.0, progress)))
+
+	def HandleStdoutProgress(self):
+		self.SetStatusMessage(self.GetRegexMatch(0))
+		# ALF_PROGRESS accumulates across tiles/buckets and can exceed 100%, so it
+		# is only used as a fallback when the authoritative percentage line (handled
+		# by HandleStdoutPercentage) hasn't appeared. Clamp it regardless.
+		if self._sawRealProgress:
+			return
+		try:
+			progress = float(self.GetRegexMatch(1))
+		except ValueError:
+			return
+		self.SetProgress(max(0.0, min(100.0, progress)))
 
 	def HandleStdoutError(self):
 		self.FailRender(self.GetRegexMatch(0))
