@@ -20,11 +20,16 @@ Redshift Standalone submitter shipped with Deadline.
 - Python, developed and tested with Python 3.7.
 - usd-core Python API: https://pypi.org/project/usd-core/
 - Thinkbox Deadline, PY3 version: https://www.awsthinkbox.com/
-- Python and libraries needs to be installed on any computer you submit from.
+- When using the integrated Deadline Submitter, Python and libraries needs to be installed on the computer you submit the job from.
+- Using the Houdini Submitter does not have external dependencies beyond the husk plugin being installed on the Deadline Repository.
 
 # Installation
 - Add usd-core library path to Python Search Path in Deadline resposity options 
 - Copy folders with files into <Deadline Repository>/custom directory
+
+# Houdini HDA
+- An example Houdini Submitter HDA + an updated script for the HDA PythonModule is in the HDA folder.
+  This is mostly is mostly meant as a starting point to create your own Houdini submitter, if needed.
 
 # FAQ
 - Deadline Shows a PXR related module error:
