@@ -244,6 +244,16 @@ class HuskPlugin(DeadlinePlugin):
 
 		tileFiles = [self._tile_filename(outFile, i) for i in range(totalTiles)]
 
+		# itilestitch refuses to overwrite an existing output and still exits 0,
+		# leaving a stale (possibly corrupt) frame in place on a requeue. Remove
+		# any existing output first so the stitch always writes a fresh image.
+		if os.path.isfile(outFile):
+			try:
+				os.remove(outFile)
+				self.LogInfo('Removed existing assembled image before stitch: {}'.format(outFile))
+			except OSError as e:
+				self.FailRender('Could not remove existing assembled image "{}": {}'.format(outFile, e))
+
 		self.LogInfo('Assembling {} tiles into: {}'.format(totalTiles, outFile))
 
 		arguments = '"{}"'.format(outFile)

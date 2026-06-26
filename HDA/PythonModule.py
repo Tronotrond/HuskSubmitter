@@ -475,6 +475,10 @@ def HuskSubmission():
                         "OutputDirectory0": frame_split[0],
                         "OutputFilename0": frame_split[1],
                     }
+                    # Optionally submit the cleanup job suspended so the user can
+                    # verify the assembled frame before manually resuming it.
+                    if node.evalParm('cleanup_suspended'):
+                        cleanup_job_info["InitialStatus"] = "Suspended"
                     cleanup_plugin_info = {
                         "CleanupJob": 1,
                         "ImageOutputDirectory": frame_output,
